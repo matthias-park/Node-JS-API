@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const feedRoutes = require("./routes/feed");
+const authRoutes = require("./routes/auth");
 
 const { use } = require("./routes/feed");
 const mongoose = require("mongoose");
@@ -50,11 +51,13 @@ app.use((req, res, next) => {
 });
 
 app.use("/feed", feedRoutes);
+app.use("/auth", authRoutes);
 
 app.use((error, req, res, next) => {
   console.log(error);
   const status = error.statusCode || 500;
   const message = error.message;
+  const data = error.data;
   res.status(status).json({ message: message });
 });
 
@@ -68,3 +71,4 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
