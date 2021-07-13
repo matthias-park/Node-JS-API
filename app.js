@@ -4,7 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
-const { graphqlHTTP } = require('express-graphql');
+const { graphqlHTTP } = require("express-graphql");
 
 const graphqlSchme = require("./graphql/Schema");
 const graphqlResolver = require("./graphql/resolver");
@@ -46,15 +46,27 @@ app.use((req, res, next) => {
     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if(req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
   next();
 });
 
 app.use(
-  '/graphql',
+  "/graphql",
   graphqlHTTP({
     schema: graphqlSchme,
     rootValue: graphqlResolver,
     graphiql: true,
+    formatError(err) {
+      if(err.originalError) {
+        return err;
+      }
+      const data = err.originalError.data;
+      const message = err.message || 'An Error occoured';
+      const code = err.originalError.code || 500;
+      return {message: message, status: code, data: data};
+    }
   })
 );
 
@@ -68,7 +80,7 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(
-    "mongodb+srv://matthias:bjs0220@node-complete.cqski.mongodb.net/message?retryWrites=true&w=majority"
+    "mongodb+srv://matthias:password@node-complete.cqski.mongodb.net/message?retryWrites=true&w=majority"
   )
   .then((result) => {
     app.listen(8080);
